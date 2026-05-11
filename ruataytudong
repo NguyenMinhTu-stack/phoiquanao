@@ -1,0 +1,23 @@
+const int sensorPin = 2;   // Cảm biến IR
+const int pumpPin = 8;     // Relay / bơm
+
+void setup() {
+  pinMode(sensorPin, INPUT);
+  pinMode(pumpPin, OUTPUT);
+  digitalWrite(pumpPin, LOW); // Tắt bơm
+  Serial.begin(9600);
+}
+
+void loop() {
+  int sensorValue = digitalRead(sensorPin);
+
+  // Nếu phát hiện tay
+  if (sensorValue == LOW) {
+    digitalWrite(pumpPin, HIGH); // Bật bơm
+    Serial.println("Dang rua tay...");
+  } 
+  else {
+    digitalWrite(pumpPin, LOW);  // Tắt ngay khi bỏ tay
+    Serial.println("Dung");
+  }
+}
