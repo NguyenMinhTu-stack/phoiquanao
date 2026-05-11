@@ -1,0 +1,59 @@
+#include <Servo.h>
+
+// Khai báo các chân cắm
+const int rainPin = A0;      // Cảm biến mưa
+const int buttonOpen = 2;    // Nút nhấn mở giàn phơi
+const int buttonClose = 3;   // Nút nhấn thu giàn phơi
+const int ledPin = 13;       // Đèn LED báo hiệu
+const int servoPin = 9;      // Chân tín hiệu Servo
+
+Servo myServo;
+
+// Cấu hình góc quay (Thay đổi tùy theo thực tế cơ cấu của bạn)
+int posOpen = 0;    // Góc khi phơi đồ
+int posClose = 180; // Góc khi thu đồ
+int threshold = 500; // Ngưỡng cảm biến mưa (giá trị càng thấp là càng ướt)
+
+void setup() {
+  pinMode(rainPin, INPUT);
+  pinMode(buttonOpen, INPUT_PULLUP); // Sử dụng điện trở kéo lên nội bộ
+  pinMode(buttonClose, INPUT_PULLUP);
+  pinMode(ledPin, OUTPUT);
+  
+  myServo.attach(servoPin);
+  myServo.write(posOpen); // Mặc định ban đầu là mở ra phơi
+  
+  Serial.begin(9600);
+}
+
+void loop() {
+  int rainValue = analogRead(rainPin);
+  bool btnOpenState = digitalRead(buttonOpen);
+  bool btnCloseState = digitalRead(buttonClose);
+
+  // 1. Kiểm tra cảm biến mưa (Ưu tiên tự động)
+  if (rainValue < threshold) { 
+    // Trời mưa
+    myServo.write(posClose);
+    digitalWrite(ledPin, HIGH); 
+    Serial.println("Troi mua! Dang thu quan ao...");
+  } 
+  // 2. Kiểm tra nút nhấn thủ công (Khi trời không mưa)
+  else {
+    digitalWrite(ledPin, LOW);
+    
+    if (btnOpenState == LOW) { // Nhấn nút mở
+      myServo.write(posOpen);
+      Serial.println("Nut nhan: Dang phoi do.");
+      delay(200); // Chống rung phím
+    }
+    
+    if (btnCloseState == LOW) { // Nhấn nút đóng
+      myServo.write(posClose);
+      Serial.println("Nut nhan: Dang thu do.");
+      delay(200);
+    }
+  }
+
+  delay(100); // Đợi một chút để hệ thống ổn định
+}
